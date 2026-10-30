@@ -277,17 +277,27 @@ $("#rl").onchange=cnt;
 const CHUNK=25;
 let CTL=null;
 const ERR={not_granted:"Izin memakai Claude belum diberikan. Muat ulang halaman dan izinkan saat diminta.",sampling_disabled:"Claude tidak tersedia untuk akun ini.",rate_limited:"Terlalu sering memanggil Claude atau batas pemakaianmu tercapai. Coba lagi nanti.",session_expired:"Sesi berakhir. Masuk ulang ke claude.ai.",prompt_too_large:"Data terlalu besar untuk satu permintaan.",upstream_error:"Gangguan sementara pada Claude. Coba lagi.",refused:"Claude menolak permintaan ini.",empty_completion:"Claude tidak memberi jawaban."};
+const HARDCODED_WORKER_URL='https://so-proxy.mnaufansidiq.workers.dev/';
+const WORKER_TIMEOUT=90000;
 async function callWorker(prompt){
-  const sample=await (window.claude&&window.claude.use("sample"));
-  if(!sample)throw new Error("Fitur Claude tidak tersedia di tampilan ini. Buka halaman ini di claude.ai.");
+  const tc=new AbortController();
+  const timer=setTimeout(()=>tc.abort("timeout"),WORKER_TIMEOUT);
+  const onAbort=()=>tc.abort("user");
+  if(CTL)CTL.signal.addEventListener("abort",onAbort);
   try{
-    const r=await sample(prompt,{modelTier:"default",cache:false,signal:CTL?CTL.signal:undefined});
-    if(r.truncated){const t=new Error("Jawaban Claude terpotong karena terlalu panjang. Coba lagi dengan UTW lebih sedikit.");t.code="truncated";throw t}
-    return{text:r.text,provider:"Claude",modelUsed:r.modelTierApplied||"default"};
+    const response=await fetch(HARDCODED_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt}),signal:tc.signal});
+    let data=null;try{data=await response.json()}catch(e){}
+    if(!response.ok)throw new Error((data&&data.error)?data.error:("Worker mengembalikan status "+response.status));
+    const text=(data&&data.text?data.text:"").trim();
+    if(!text)throw new Error("AI tidak memberikan hasil apa pun.");
+    return{text,provider:(data&&data.provider)||"?",modelUsed:(data&&data.modelUsed)||"?"};
   }catch(e){
-    if(e&&e.code&&!(e instanceof Error)){const t=new Error(e.code==="cancelled"?"Dibatalkan.":(ERR[e.code]||e.message||"Gagal memanggil Claude."));t.code=e.code;throw t}
+    if(tc.signal.aborted){
+      if(tc.signal.reason==="user"){const t=new Error("Dibatalkan.");t.code="cancelled";throw t}
+      throw new Error("Permintaan ke AI terlalu lama (timeout "+(WORKER_TIMEOUT/1000)+" detik).");
+    }
     throw e;
-  }
+  }finally{clearTimeout(timer);if(CTL)CTL.signal.removeEventListener("abort",onAbort)}
 }
 const parseJ=t=>JSON.parse(t.replace(/```json|```/g,"").trim().replace(/^[^{]*/,"").replace(/[^}]*$/,""));
 const CRIT=`KRITERIA (terapkan ketat dan konsisten):
@@ -447,9 +457,10 @@ $("#dl").onclick=async()=>{
   z.file("word/document.xml",doc);
   try{
     const blob=await z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-    const dls=await (window.claude&&window.claude.use("downloads"));
-    if(!dls)return msg("Unduhan tidak tersedia di tampilan ini.",1);
-    await dls.save({filename:"Pencocokan_UTW_Angket"+(R.jab?"_"+R.jab.replace(/[^\w]+/g,"_"):"")+".docx",data:blob});msg("");
+    const fn="Pencocokan_UTW_Angket"+(R.jab?"_"+R.jab.replace(/[^\w]+/g,"_"):"")+".docx";
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);msg("");
   }catch(e){msg(e&&e.code==="declined"?"Unduhan dibatalkan.":"Gagal mengunduh: "+((e&&(e.message||e.code))||e),1)}
 };
 </script>
