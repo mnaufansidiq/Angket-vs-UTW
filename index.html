@@ -274,7 +274,7 @@ $("#jab").oninput=()=>{if(AK.length)renderR(false)};
 $("#rl").onchange=cnt;
 
 /* ==== Worker ==== */
-const CHUNK=25;
+const CHUNK=8;
 let CTL=null;
 const ERR={not_granted:"Izin memakai Claude belum diberikan. Muat ulang halaman dan izinkan saat diminta.",sampling_disabled:"Claude tidak tersedia untuk akun ini.",rate_limited:"Terlalu sering memanggil Claude atau batas pemakaianmu tercapai. Coba lagi nanti.",session_expired:"Sesi berakhir. Masuk ulang ke claude.ai.",prompt_too_large:"Data terlalu besar untuk satu permintaan.",upstream_error:"Gangguan sementara pada Claude. Coba lagi.",refused:"Claude menolak permintaan ini.",empty_completion:"Claude tidak memberi jawaban."};
 const HARDCODED_WORKER_URL='https://so-proxy.mnaufansidiq.workers.dev/';
