@@ -1,327 +1,217 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Pencocokan UTW dan Angket</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pencocokan Substansi Angket dan FTE</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#5d6772;--bd:#d9dee4;--ac:#1f6feb;--ok:#18794e;--okb:#dff5e8;--pa:#8a5a00;--pab:#fff1cc;--no:#a12a2a;--nob:#fbdcdc}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--card:#1d2126;--tx:#e8eaed;--mu:#9aa4af;--bd:#343b43;--ac:#5b9dff;--ok:#6fdc9f;--okb:#17382a;--pa:#f0c566;--pab:#3d3113;--no:#ff9b9b;--nob:#442020;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#14171a;--card:#1d2126;--tx:#e8eaed;--mu:#9aa4af;--bd:#343b43;--ac:#5b9dff;--ok:#6fdc9f;--okb:#17382a;--pa:#f0c566;--pab:#3d3113;--no:#ff9b9b;--nob:#442020;color-scheme:dark}
-*{box-sizing:border-box}
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#5d6772;--bd:#d9dee4;--ac:#1f6feb;--ok:#18794e;--okb:#dff5e8;--pa:#8a5a00;--pab:#fff1cc;--no:#a12a2a;--nob:#fbdcdc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--card:#1d2126;--tx:#e8eaed;--mu:#9aa4af;--bd:#343b43;--ac:#5b9dff;--ok:#6fdc9f;--okb:#17382a;--pa:#f0c566;--pab:#3d3113;--no:#ff9b9b;--nob:#442020}}
 html,body{margin:0}body{background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:1000px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:22px;margin:0 0 4px}p.sub{color:var(--mu);margin:0 0 18px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
 .card h2{font-size:16px;margin:0 0 8px}
 input[type=file]{width:100%;font-size:14px}
-input[type=text],input[type=number],select,textarea,button{font:inherit;color:var(--tx)}
-input[type=text],input[type=number]{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
-input[type=number]{width:80px}
-textarea{width:100%;min-height:170px;margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
-select{margin-top:8px;padding:6px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);max-width:100%}
+select,textarea,button{font:inherit;color:var(--tx)}
+textarea{width:100%;box-sizing:border-box;min-height:200px;margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg)}
+select{margin-top:8px;padding:6px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);max-width:100%;width:100%}
 .hint{font-size:13px;color:var(--mu);margin-top:6px}
 .btn{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:10px 18px;cursor:pointer;font-weight:600}
 .btn.sec{background:transparent;color:var(--ac);border:1px solid var(--ac)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
 #msg{color:var(--mu);font-size:14px}#msg.err{color:var(--no)}
-.chip{padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;display:inline-block}
+.sum{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.chip{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
 .Sesuai{background:var(--okb);color:var(--ok)}.Sebagian{background:var(--pab);color:var(--pa)}.Tidak{background:var(--nob);color:var(--no)}
-select.st{margin-top:0;padding:4px 6px;font-size:13px;font-weight:600}
+select.st{margin-top:0;padding:4px 6px;font-size:13px;font-weight:600;width:auto}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
 th,td{border:1px solid var(--bd);padding:8px;text-align:left;vertical-align:top}th{background:var(--bg)}
+.opts{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:10px;font-size:14px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
 .hidden{display:none}
-#rl{max-height:260px;overflow:auto;border:1px solid var(--bd);border-radius:8px;margin-top:8px;background:var(--bg)}
-#rl label{display:block;padding:6px 10px;border-bottom:1px solid var(--bd);cursor:pointer;font-size:14px}
-#rl label:last-child{border-bottom:0}
-#rl small{color:var(--mu)}
-.mirip{color:var(--pa);font-weight:700;font-size:12px}
-.verdict{font-size:20px;font-weight:700;padding:10px 16px;border-radius:10px;display:inline-block}
-.src{color:var(--mu);font-size:12px}
-.cats label{margin-right:14px;font-size:14px;white-space:nowrap}
 </style>
-
+</head>
+<body>
 <main>
-<h1>Pencocokan UTW dan Hasil Angket</h1>
-<p class="sub">Satu jabatan, satu UTW. Pilih responden angket untuk jabatan itu, AI mencocokkan berdasarkan makna, lalu hasilnya bisa diunduh sebagai dokumen Word.</p>
+<h1>Pencocokan Substansi Angket dan FTE</h1>
+<p class="sub">Angket (bagian tugas rutin) sudah tertanam di aplikasi. Cukup unggah file FTE, pilih responden, lalu AI mencocokkan berdasarkan makna dan hasilnya bisa diunduh sebagai dokumen Word.</p>
+
+<div class="card" style="margin-bottom:14px"><h2>Unggah file FTE (Excel)</h2>
+  <input type="file" id="fte" accept=".xlsx,.xls">
+  <select id="fsheet" class="hidden"></select>
+  <div class="hint">Aplikasi membaca kolom "Aktivities" pada setiap sheet (sampai baris TOTAL FTE). Pilih sheet jabatan yang sesuai, atau "Semua sheet digabung".</div></div>
+
+<div class="card" style="margin-bottom:14px"><h2>Pilih responden angket</h2>
+  <select id="dept"></select>
+  <select id="resp"></select>
+  <div class="opts">
+    <label><input type="checkbox" id="brk" checked> Pecah kalimat berdaftar koma menjadi uraian terpisah</label>
+  </div>
+  <div class="hint">Pilih departemen dulu untuk menyaring daftar responden. Kotak 1 terisi otomatis dari tugas rutin responden, satu uraian per baris.</div></div>
 
 <div class="grid">
-  <div class="card"><h2>1. Hasil angket</h2>
-    <div class="hint" id="fai" style="margin-top:0"></div>
-    <details style="margin-top:10px"><summary class="hint" style="cursor:pointer">Update angket (opsional)</summary>
-    <div class="hint">Pakai kalau ada pengisian angket baru. Unggah file angket terbaru (boleh berisi semua responden).</div>
-    <div style="margin-top:6px;font-size:14px"><label><input type="radio" name="um" value="gabung" checked> Gabungkan: tambah responden baru, perbarui yang sudah ada</label><br><label><input type="radio" name="um" value="ganti"> Ganti semua dengan isi file ini</label></div>
-    <input type="file" id="fa" accept=".xlsx,.xls" style="margin-top:8px">
-    <div class="bar" style="margin:8px 0 0"><button class="btn sec" id="rst" type="button" style="padding:6px 12px;font-size:13px">Kembalikan ke angket bawaan</button></div>
-    <div class="hint" id="uinfo"></div>
-    <div class="hint">Kolom dikenali dari judulnya (Nama Lengkap, Jabatan, Departemen, Unit, fungsi utama, tugas rutin, tanggung jawab, hak/wewenang).</div></details></div>
-  <div class="card"><h2>2. UTW jabatan ini</h2>
-    <input type="text" id="jab" placeholder="Nama jabatan UTW, mis. Officer Inventory Control">
-    <input type="file" id="fu" accept=".pdf,.docx,.xlsx,.xls,.txt" style="margin-top:8px">
-    <select id="usel" class="hidden"></select>
-    <textarea id="ut" placeholder="Atau tempel di sini, satu uraian per baris"></textarea>
-    <div class="hint" id="uc">0 uraian</div>
-    <div id="usecs" class="cats hidden" style="margin-top:8px"><strong style="font-size:14px">Bagian UTW yang diambil:</strong><br>
-      <label><input type="checkbox" class="usec" value="fungsi" checked> Fungsi utama</label>
-      <label><input type="checkbox" class="usec" value="rutin" checked> Tugas rutin</label>
-      <label><input type="checkbox" class="usec" value="tj" checked> Tanggung jawab</label>
-      <label><input type="checkbox" class="usec" value="wew" checked> Wewenang</label>
-      <div class="hint" id="utinfo"></div></div>
-    <div class="hint">Bisa unggah PDF, Word (.docx), Excel, atau .txt. Isinya masuk ke kotak di atas dan bisa diedit: hapus baris yang bukan uraian tugas (judul, kualifikasi, dsb.) sebelum dicocokkan.</div></div>
+  <div class="card"><h2>1. Uraian Angket</h2>
+    <textarea id="tU" placeholder="Pilih responden di atas, atau tempel di sini, satu uraian per baris"></textarea>
+    <div class="hint" id="cU">0 uraian</div></div>
+  <div class="card"><h2>2. Uraian FTE</h2>
+    <textarea id="tF" placeholder="Unggah file FTE di atas, atau tempel di sini, satu uraian per baris"></textarea>
+    <div class="hint" id="cF">0 uraian</div></div>
 </div>
+<div class="hint">Kamu bisa mengedit atau menempel teks langsung di kotak 1 dan 2 sebelum dicocokkan.</div>
 
-<div class="card" style="margin-top:14px"><h2>3. Pilih responden untuk jabatan ini</h2>
-  <div class="hint" style="margin-top:0">Daftar diurutkan menurut kemiripan dengan nama jabatan di atas (ditandai "mirip"). Centang satu atau lebih responden. Kalau ada beberapa, jawabannya digabung: satu butir UTW dianggap tercakup bila salah satu responden menyebutnya.</div>
-  <select id="dept" class="hidden"></select>
-  <div id="rl"></div>
-  <div class="hint" id="rc"></div>
-  <div class="cats" style="margin-top:10px"><strong style="font-size:14px">Bagian jawaban yang dibandingkan:</strong><br>
-    <label><input type="checkbox" class="cat" value="fungsi" checked> Fungsi utama</label>
-    <label><input type="checkbox" class="cat" value="rutin" checked> Tugas rutin</label>
-    <label><input type="checkbox" class="cat" value="tj" checked> Tanggung jawab</label>
-    <label><input type="checkbox" class="cat" value="wew" checked> Hak/wewenang</label></div>
-</div>
-
-<div class="bar"><button class="btn" id="go">Cocokkan dengan AI</button><button class="btn sec hidden" id="stop" type="button">Batal</button><span id="msg"></span></div>
+<div class="bar"><button class="btn" id="go">Cocokkan dengan AI</button><span id="msg"></span></div>
 
 <section id="out" class="hidden">
-  <div class="bar" style="margin-top:0">
-    <span class="verdict" id="vd"></span>
-    <label class="hint" style="margin:0">Ambang YA: <input type="number" id="thr" value="50" min="1" max="100"> %</label>
-    <button class="btn sec" id="cp">Salin hasil (YA/TIDAK)</button>
-  </div>
-  <div id="sum" class="tw"></div>
+  <div class="hint" id="meta" style="margin:0 0 6px"></div>
+  <div class="sum" id="sum"></div>
   <div class="bar"><button class="btn sec" id="dl">Unduh sebagai Word (.docx)</button></div>
-  <div class="card tw"><table><thead><tr><th>No</th><th>Uraian UTW</th><th>Jawaban angket yang sesuai</th><th>Status</th><th>Skor</th><th>Alasan</th></tr></thead><tbody id="tb"></tbody></table></div>
-  <div class="card" style="margin-top:14px"><h2>Jawaban angket tanpa padanan di UTW</h2><div class="hint" style="margin:0 0 6px">Butir jawaban responden yang tidak ada secara spesifik di UTW.</div><ul id="fx"></ul></div>
-  <p class="hint">Hasil AI adalah pemetaan awal. Status tiap baris bisa diubah lewat dropdown (ringkasan, persentase, dan YA/TIDAK ikut berubah, begitu pula file Word). Jawaban yang terlalu umum (mis. "sesuai UTW", "ikut arahan atasan") tidak dihitung sebagai kecocokan. Periksa kembali sebelum dipakai untuk dokumen resmi.</p>
+  <div class="card tw"><table><thead><tr><th>No</th><th>Uraian Angket</th><th>Uraian FTE yang sesuai</th><th>Status</th><th>Skor</th><th>Alasan</th></tr></thead><tbody id="tb"></tbody></table></div>
+  <div class="card" style="margin-top:14px"><h2>FTE tanpa padanan di Angket</h2><div class="hint" style="margin:0 0 6px">Uraian FTE yang tidak ada secara spesifik di Angket.</div><ul id="fx"></ul></div>
+  <p class="hint">Hasil AI adalah pemetaan awal. Status tiap baris bisa diubah lewat dropdown (ringkasan dan persentase ikut berubah, dan file Word yang diunduh mengikuti). Periksa kembali sebelum dipakai untuk dokumen resmi.</p>
 </section>
 </main>
+
+<script type="application/json" id="angket-data">[{"nama": "Riris Nur Utami", "jabatan": "Staff", "dept": "Accounting", "unit": "Cost Control", "fungsi": "Memonitoring kelengkapan terkait berkas berkas dari vendor sebelum dilakukan pembayaran", "rutin": "melakukan verifikasi terkait berkas dari hutang dagang seperti kelengkapan dokumen dan kesesuaian nominal yang akan dibayarkan", "tj": "1. memastikan kelengkapan dokumen atau berkas yang akan di bayarkan\n 2. memastikan nominal yang dibayarkan telah sesuai", "wew": "1. apabila dokumen tidak sesuai baik secara kelengkapan atau nominal, kami sebagai tim cost control berhak untuk mengembalikan berkas tersebut ke unit terkait agar dilengkapi atau disesuaikan sebelum diproses bayar\n 2. apabila terdapat dokumen yang dengan anggaran yang tidak sesuai, kami dapat meminta agar unit terkait melakukan revisi"}, {"nama": "Bambang Irawan", "jabatan": "Staf Pajak", "dept": "Accounting", "unit": "Pajak", "fungsi": "pajak, kuasa khusus perpajakan PT UMF, drafter, signer, creator Bukti potong PPh Unifikasi (PPh Ps.23 & Ps. 4(2) ) & PPN ( Faktur pajak, retur FPM, SPT PPN)\n menanggapi jika ada surat dari KPP/Kanwil DJP\n responden jika ada pemanggilan dr KPP/DJP", "rutin": "upload FPM PPN, retur FPM PPN, srafter + signer Faktur pajak, drafter+signer bukti potong pph ps.23 & 4(2), drafter+signer SPT Unifikasi, draftrer+sign spt PPN, \n oret2an hitungan pajak, meet+argumen vs vendor", "tj": "semua yang terkait Pajak PT UMF - RS JIH (termasuk PPh Ps.21 meski secara jabatan sdh dihandle PT,tp utk bbrp case masih belok ke saya", "wew": "semua hal yang terkait dengan perpajakan di PT UMF - RS JIH baik hubungan internal maupun eksternal"}, {"nama": "PRAMESTI AULIA ANDANI", "jabatan": "STAF PAJAK", "dept": "Accounting", "unit": "COST CONTROL", "fungsi": "Mengerjakan bagian Pajak PPN dari memastikan dokumen transaksi hinga memastikan pajak masukan dan keluaran tercatat.", "rutin": "1. Memverifikasi faktur pajak yang diterima untuk disamakan dengan sistem baik sistem evizia maupun sistem DJP (Coretax).\n 2. Memverifikasi, menghitung dan membuat faktur pajak.\n 3. Memverifikasi, menghitung dan membuat nota retur.", "tj": "1. Menyelesaikan verifikasi faktur pajak untuk setiap harinya baik dari sistem evizia maupun sistem coretax \n 2. Membuat permintaan faktur pajak\n 3. Membuat permintaan retur", "wew": "1. Menjalankan pekerjaan sesuai dengan UTW\n 2. Memverifikasi, memeriksa serta meminta kelengkapan dokumen.\n 3. Mehitung tarif PPN \n 4. Memproses dan menerbitkan faktur pajak dan nota retur"}, {"nama": "Arina Alva Rizki", "jabatan": "Staff Humas", "dept": "Customer Relation", "unit": "Customer Relation", "fungsi": "Menjaga corporate image, menjaga hubungan yang baik kepada masyarakat/public, membina hubungan yang baik, memahami product knowledge, membina hubungan baik kepada media, memberikan informasi yang dibutuhkan pasien..", "rutin": "menghadapi dan menyelesaikan keluhan, membuat press release, menerima tamu, membuat testimoni yang berkaitan dengan kepuasan pelanggan, menerima kunjungan, escorting pasien, mengikuti tugas sehari-hari sesuai dengan arahan.", "tj": "memastikan keluhan terselesaikan, menjaga kerahasiaan dokumen, melakukan pekerjaan sesuai dengan prosedur dan ketentuan yang ada, memastikan informasi layanan perusahaan tersampaikan, mengembangkan diri baik perilaku maupun pengetahuan dan keterampilan.", "wew": "melakukan koordinasi jika ada bukti pendukung yang kurang lengkap atau prosedur yang tidak sesuai kepada bagian lain yang terkait, meminta dokumen transaksi/laporan dari tiap departemen terkait sesuai dengan waktu yang telah ditentukan."}, {"nama": "NAVI FAUZIAH AHMANTARI", "jabatan": "STAF", "dept": "Customer Relation", "unit": "CUSTOMER RELATION", "fungsi": "Membantu kelancaran layanan, memberikan informasi dan handle complain", "rutin": "Menginformasikan promo layanan, informasi estimasi biaya, merespon dan menindaklanjuti keluhan pasien, memantau kelancaran layanan rawat jalan", "tj": "Menjalankan utw yang diberikan atasan", "wew": "Menyampaikan informasi layanan rumah sakit, meminta informasi promo layanan update ke departemen pemasaran dan penjualan, memberikan solusi terhadap keluhan pasien, melaksanakan tugas dan delegasi dari supervisor"}, {"nama": "Kurnia Dewi Agustin", "jabatan": "Staf HK di area laundry", "dept": "General Affair", "unit": "Housekeeping/ general affair", "fungsi": "Memberikan pelayanan yang baik", "rutin": "Memonitoring dan membuat rekapan", "tj": "Membuat laporan dan melaporkan hasil kerja", "wew": "Melaporkan hasil ke atasan koordinasi dengan atasan"}, {"nama": "Rodi setyawan sh", "jabatan": "Stff pelaksana", "dept": "General Affair", "unit": "Housekeeping /General effair", "fungsi": "Mengarahkan dan memberi contoh kepada unit yg diampu dan memberikan pelayanan", "rutin": "Memonitorong pekerjaan yang dilakukan unit untuk selanjutnya memberikan arahan apa bila pekerjaan yang dilakukan kurang sesuai", "tj": "Melaporkan hasil ke atasan", "wew": "Hak sebagai staff menerima arahan atasan apa bila ada permasalahan yang tidak dapat diselesaikan /berhak memberikan teguran terhadap unit yang melakukan pelanggaran dilapangan"}, {"nama": "Farida Andra Putri", "jabatan": "Staf Kesehatan Lingkungan", "dept": "General Affair", "unit": "General Affair", "fungsi": "Mengkoordinir kegiatan kesehatan lingkungan di Rumah Sakit “JIH”", "rutin": "1. Penyelenggaraan penyehatan ruang bangunan dan halaman rumah sakit\n 2. Penyelenggaraan penyehatan air\n 3. Penyelenggaraan pengelolaan limbah\n 4. Penyelenggaraan pengendalian serangga, tikus dan binatang penganggu lainnya\n 5. Penyelenggaraan penyehatan udara\n 6. Penyelenggaraan inspeksi sanitasi rumah sakit", "tj": "1. Melaksanakan, memastikan dan memonitoring semua aspek kesehatan lingkungan.\n 2. Melaksanakan kegiatan monitoring kualitas lingkungan (air limbah, air bersih, angka kuman udara, lantai dan dinding, kebisingan, pencahayaan, kualitas udara emisi, dll)\n 3. Pelaporan Implementasi Dokumen Lingkungan AMDAL\n 4. Pelaporan SIMPEL, SIMPELDA, SIPATA dan SIKELIM\n 5. Menyusun laporan implementasi pengolahan dan pemantauan lingkungan untuk kepentingan internal dan instalasi Rumah Sakit", "wew": "Hak dan Wewenang ada di Supervisor"}, {"nama": "Dwi Astuti", "jabatan": "Staf", "dept": "General Affair", "unit": "Housekeeping", "fungsi": "Memastikan kesiapan kamar rawat inap dan rawat jalan Rumah Sakit “JIH”\n Melayani kebutuhan pasien dan keluarganya selama di rawat Inap\n Berkoordinasi dengan pelayanan keperawatan dan unit-unit terkait dalam pelayanan\n Penerimaan dan pengecekan barang dari vendor\n Administrasi sesuai kebutuhan harian dalam pelayanan \n Memastikan distribusi berjalan dengan baik", "rutin": "Merekap data evaluasi OS\n Permintaan gudang umum dan farmasi\n pengajuan dan penerimaan makan non klinis all unit\n membuat laporan bulanan\n pengecekan kamar ranap n rajal\n pengecekan kebersihan all area\n merekap data 3 bulanan OS", "tj": "Memastikan permintaan barang Gudang House Keeping\n Pemenuhan stock barang di Gudang untuk pelayanan rawat inap dan rawat jalan RS”JIH”\n Menyelesaikan surat-surat yang dibutuhkan atas perintah atasan.\n Memastikan fasilitas layanan kamar rawat inap dan rawat jalan\n Memastikan pelayanan kebersihan dan kerapian, keindahan area Indoor dan Outdoor", "wew": "Memelihara dan merawat fasilitas di area Ranap dan Rajal\n Menolak dan mengembalikan barang yang tidak sesuai dengan Surat Pemesanan Barang"}, {"nama": "Sri lestari SE", "jabatan": "Supervisor", "dept": "General Affair", "unit": "House Keeping", "fungsi": "1. Mengawasi dan memastikan bahwa pelayanan House Keeping dari layanan Keamanan, ketertiban dan kenyamanan serta layanan Ranap rajal berjalan dengan sebaik mungkin \n 2. Ketersediaan stok barang BHP dan fasilitas pendukung layanan berjalan dengan baik \n 3. Memastikan dan mengawasi pelaksanaan pelayanan dari seluruh Mitra kerja OS dari layanan Driver, Security, cleaning service, laundry, parkir, ekspedisi, Houseman, room attandent, Gardening, billboy, ADM. OS, operator, Asper,", "rutin": "1. Melakukan koordinasi rutin untuk pelayanan House Keeping pusat\n 2. Melakukan koordinasi rutin pelayanan Ranap \n 3. Melakukan rapat koordinasi dengan leader Mitra kerja terkait pelayanan.\n 4. Memastikan stok gudang layanan tersedia \n 5. Melakukan koordinasi permintaan barang \n 6. Melakukan inspeksi keliling di pelayanan Ranap rajal dan area outdoor \n 7. Memastikan kelengkapan MP OS sesuai jadwal\n 8. Memastikan layanan Lost and found berjalan dengan baik \n 9. Melakukan koordinasi dengan manajemen terkait pelayanan\n 10. Membuat laporan \n 11. Membuat RKAP\n 12. Memastikan Permintaan sesuai RKAP \n 13. Mengikuti rapat koordinasi \n 14. Melakukan training ke OS terkait pelaksanaan pelayanan \n 15. Melakukan koordinasi antar unit kerja terkait pelayanan \n 16. Jaga DM\n 17. Membuat laporan BSC", "tj": "Mengawasi dan memastikan semua pelayanan di Unit House Keeping berjalan sebaik mungkin....tugas harian mingguan maupun bulanannya.", "wew": "Mengkoordinasikan, mengawasi, dan memastikan kelancaran pelayanan serta Operasional Rumah Sakit berjalan dengan baik"}, {"nama": "waluyo", "jabatan": "staf maintenance", "dept": "General Affair", "unit": "General Affair", "fungsi": "koordinasi dengan unit terkait komplainan dan solusinya", "rutin": "memastikan alat utilitas aman dan berfungsi dengan baik", "tj": "*mematuhi setiap peraturan yang ada\n *melaporkan setiap kejadian ke atasan\n *memberikan pelayanan ( service) komplainan ke unit dengan baik", "wew": "*memerintahkan pengerjaan komplainan yg kecil/ yang urgent dan tidak ada efect besar. \n *mengkoordinir team os maintenance"}, {"nama": "Rizaldi Ihfatullah", "jabatan": "Staf Drafter", "dept": "General Affair", "unit": "General Affair", "fungsi": "1. Mengimajinasikan atau merealisasikan bayangan ke dalam sebuah gambar yang lebih mudah dimengerti dan mudah dipahami\n 2. Mendetailkan dan memperjelas gambaran atau rancangan awal yang telah dibuat arsitektur, desainer atau engineer", "rutin": "1. Mengerjakan dokumen gambar perencanaan yang akan dan sedang berlangsung didalam lingkup RS JIH Yogyakarta\n 2. Menggunakan software atau program Computer Aided-Drafting (CAD) dalam mengerjakan gambar yang dibuatnya\n 3. Menciptakan desain produk yang efektif berdasarkan pengetahuan mereka tentang ilmu arsitektur\n 4. Mengikuti Tadarus Subuh sesuai jadwal yang telah ditentukan\n 5. Mengikuti pengajian bulanan", "tj": "1. Mengerjakan dokumen gambar perencanaan detail dan memeriksa, mengontrol pekerjaan yang sedang berlangsung di RS “JIH” Yogyakarta\n 2. Mengkoordinasikan hasil pekerjaannya kepada pihak-pihak yang berkaitan dan berurusan dengan desain dari suatu hal yang dikerjakannya.\n 3. Melaporkan hasil Desain dan Pekerjaan ke Supervisor Perawatan Umum\n 4. Melakukan pekerjaan sesuai prosedur dan ketentuan yang ada termasuk mengedepankan unsur kehati-hatian dan keamanan kerja\n 5. Menjaga kerahasiaan perusahaan dan dokumen baik hardcopy maupun softcopy\n 6. Berpartisipasi terhadap kegiatan peningkatan mutu dan keselamatan pasien\n 7. Menjaga aset dan inventaris perusahaan\n 8. Menjalankan prinsip-prinsip syariah yang telah ditetapkan perusahaan\n 9. Mendukung program K3 Rumah Sakit\n 10. Melaksanakan aturan perusahaan dan menjaga nama baik perusahaan", "wew": "Mengerjakan tugas sesuai apa yang diperintahkan atasan"}, {"nama": "samsul hadi", "jabatan": "Spv Legal & IR", "dept": "Human Capital", "unit": "Legal & IR", "fungsi": "Mengkoordinasikan, mengawasi, dan mengevaluasi pelaksanaan fungsi hukum perusahaan dan hubungan industrial untuk memastikan kepatuhan terhadap peraturan perundang-undangan, meminimalkan risiko hukum, melindungi kepentingan perusahaan, serta mewujudkan hubungan industrial yang harmonis dan kondusif.", "rutin": "(1) Melakukan penelaahan, penyusunan, dan penyempurnaan dokumen hukum, termasuk perjanjian kerja sama, nota kesepahaman, perjanjian kerahasiaan, surat kuasa, dan dokumen hukum lainnya.\n (2) Melakukan kajian hukum atas kebijakan, keputusan, dan kegiatan operasional perusahaan serta memberikan rekomendasi hukum kepada atasan dan unit kerja terkait.\n (3) Memantau perkembangan peraturan perundang-undangan yang relevan dengan kegiatan usaha perusahaan serta mengidentifikasi implikasinya terhadap kebijakan dan operasional perusahaan.\n (4) Melakukan pemantauan terhadap masa berlaku, pelaksanaan, perubahan, perpanjangan, dan pengakhiran perjanjian perusahaan.\n (5) Mengoordinasikan penanganan permasalahan hukum, klaim, somasi, sengketa, dan permasalahan kontraktual dengan pihak internal maupun eksternal.\n (6) Menelaah dan memantau pelaksanaan kebijakan ketenagakerjaan, peraturan perusahaan, perjanjian kerja, serta ketentuan hubungan industrial lainnya.", "tj": "(1) Memastikan dokumen hukum yang ditelaah atau disusun telah sesuai dengan peraturan perundang-undangan, kebijakan internal, dan kepentingan perusahaan.\n (2) Memastikan risiko hukum dan risiko hubungan industrial diidentifikasi, dianalisis, serta ditindaklanjuti secara tepat.\n (3) Memastikan pelaksanaan fungsi Legal & Industrial Relations berjalan sesuai prosedur, target, dan standar kerja yang ditetapkan.\n (4) Memastikan penanganan permasalahan hukum dan hubungan industrial dilaksanakan secara profesional, objektif, terdokumentasi, dan sesuai dengan ketentuan yang berlaku.\n (5) Memastikan pemantauan terhadap pelaksanaan perjanjian dan pemenuhan kewajiban hukum perusahaan dilakukan secara tertib dan tepat waktu.\n (6) Menjaga kerahasiaan dokumen, informasi hukum, data pekerja, dan informasi perusahaan yang berada dalam lingkup kewenangannya.\n (7) Memastikan rekomendasi hukum disampaikan secara akurat, berdasarkan kajian yang memadai, dan disertai pertimbangan risiko yang relevan.\n (8) Memastikan koordinasi dengan unit kerja dan pihak eksternal berjalan efektif dalam mendukung penyelesaian permasalahan hukum dan hubungan industrial.\n (9) Memastikan pelaksanaan tugas staf di bawah koordinasinya sesuai dengan pembagian tugas dan standar yang ditetapkan.\n (10) Mempertanggungjawabkan pelaksanaan tugas dan pencapaian target kerja kepada atasan sesuai struktur organisasi perusahaan.", "wew": "(1) Meminta data, dokumen, dan informasi yang relevan dari unit kerja terkait untuk kepentingan kajian hukum, penelaahan perjanjian, dan penanganan permasalahan hubungan industrial sesuai ketentuan akses informasi perusahaan.\n \n (2) Memberikan masukan, pertimbangan, dan rekomendasi hukum kepada atasan dan unit kerja terkait dalam lingkup tugas dan tanggung jawabnya.\n \n (3) Melakukan penelaahan dan memberikan catatan atau usulan perbaikan atas rancangan perjanjian, kebijakan, surat keputusan, surat edaran, dan dokumen hukum lainnya sebelum diajukan kepada pejabat yang berwenang.\n \n (4) Meminta klarifikasi dan dokumen pendukung kepada pihak terkait dalam penanganan pengaduan pekerja, dugaan pelanggaran disiplin, dan perselisihan hubungan industrial.\n \n (6) Memberikan arahan kerja, membagi tugas, serta melakukan pemantauan dan evaluasi terhadap staf yang berada di bawah koordinasinya.\n \n (7) Mewakili unit Legal & Industrial Relations dalam rapat koordinasi atau pembahasan teknis sesuai penugasan dan kewenangan yang diberikan.\n \n (8) Mengusulkan penggunaan jasa advokat, konsultan hukum, atau tenaga ahli lain untuk menangani permasalahan yang memerlukan keahlian khusus kepada atasan."}, {"nama": "Tri Yulianto", "jabatan": "Staf Pengembang Aplikasi", "dept": "IT", "unit": "Software", "fungsi": "Mengembangkan fitur baru dan perbaikan fitur yang sudah ada", "rutin": "Memberikan dukungan teknis kepada user terkait.", "tj": "Mengalisa kebutuhan fitur baru, perbaikan fitur, atau aplikasi baru yang akan dikembangkan.", "wew": "Mengambil keputusan teknis sederhana, mengakses data/informasi sesuai dengan hak akses yang ditentukan"}, {"nama": "Fitria Larantika", "jabatan": "Staff Penguji Aplikasi", "dept": "IT", "unit": "Software Development", "fungsi": "Melakukan pengecekan dan pengujian pada aplikasi IT yang update, upgrade, ataupun baru", "rutin": "review test case, melakukan UAT, sosialisasi aplikasi, test aplikasi, melaksanakan program kerja unit", "tj": "menjaga aset perusahaan, menjaga kerahasiaan data, melaksanakan aturan perusahaan, menganalisa dan mengembangkan aplikasi yang diajukan oleh unit", "wew": "mengakses data dan informasi sesuai dengan hak akses, memberikan masukan kepada atasan berdasar analisis dan sesuai bidang, penanganan gangguan atau tindakan untuk perbaikan software, mengambil keputusan teknis sederhana sesuai SPO, memberikan rekomendasi kepada pengguna"}, {"nama": "Revansha Zulfikar Alfaz", "jabatan": "IT System Analyst", "dept": "IT", "unit": "Software", "fungsi": "Menganalisis proses bisnis, merancang alur sistem, mendokumentasikan kebutuhan teknis, serta berkoordinasi dengan pengembang aplikasi agar sistem sesuai kebutuhan operasional perusahaan.", "rutin": "Melakukan analisis kebutuhan sistem, membuat prototype aplikasi, menguji hasil pengembangan vendor, memantau dokumentasi dan progres proyek, serta memastikan performa dan integrasi aplikasi berjalan baik. Memberikan dukungan teknis kepada pengguna, menjalankan tugas sesuai arahan atasan, dan mengikuti pengajian bulanan.", "tj": "Menganalisis kebutuhan aplikasi, mengembangkan modul baru, menangani kendala, dan memelihara sistem TI rumah sakit agar berjalan optimal. Menjaga aset, kerahasiaan data, serta mematuhi prosedur, peraturan, dan prinsip syariah perusahaan.", "wew": "Mengikuti program keagamaan dan pengajian bulanan, memberikan masukan serta rekomendasi berdasarkan hasil analisis, menangani gangguan sistem, dan berkoordinasi dengan vendor untuk perbaikan aplikasi."}, {"nama": "Handaru Budi Setiawan", "jabatan": "Staf Admin Jaringan", "dept": "IT", "unit": "IT", "fungsi": "Melakukan pemeliharaan jaringan dan memastikan ketersediaan jaringan di RS JIH", "rutin": "memelihara dan monitoring jaringan", "tj": "Memelihara dan mendokumntasikan setting jaringan", "wew": "mengambil tindakan pada permasalahan jaringan"}, {"nama": "Gilang Nur Fitriyanto", "jabatan": "IT Hardware Officer", "dept": "IT", "unit": "IT", "fungsi": "Mengelola, menginventarisasi dan memaintenance hardware IT baik layanan maupun back office", "rutin": "Melakukan perawatan hardware dengan it support agar komputer dan perangkat berjalan dengan lancar\n Mengelola aset mulai dari diterima, service hingga dimusnahkan\n Melakukan koordinasi kepada unit di JIH terkait kebutuhan IT\n Melakukan koordinasi kepada vendor baik terkait produk, layanan dan service.\n Mengkoordinasi IT support terkait kebutuhan IT di rumah sakit JIH", "tj": "Memastikan kelancaran perangkat IT di layanan dan back office\n Memberikan support kepada user terkait kendala IT dan perangkatnya\n Melakukan Analisa dan Perbaikan terhadap kendala dan kerusakan perangkat IT", "wew": "Melakukan perawatan baik software ataupun hardware perangkat IT\n Melakukan instalasi software sesuai dengan ketentuan IT rumah sakit JIH\n Melakukan pemeriksaan dan memberikan rekomendasi terkait kondisi, kelayakan, serta kebutuhan penggantian perangkat keras IT\n Membukukan dan mencatat aset IT di rumah sakit JIH"}, {"nama": "Ilyas Safitri", "jabatan": "SPV Infrastructure", "dept": "IT", "unit": "Infrastructure", "fungsi": "Melakukan instalasi dan pemeliharaan perangkat, jaringan, dan sistem IT untuk memastikan layanan teknologi informasi Rumah Sakit “JIH” tetap stabil dan berfungsi dengan baik.", "rutin": "Melaksanakan pengelolaan dan pengembangan sistem IT dan jaringan, menangani kebutuhan serta kendala pengguna, melakukan dokumentasi dan administrasi sistem, serta memastikan pekerjaan berjalan sesuai standar dan kebijakan perusahaan. Selain itu, bertanggung jawab dalam koordinasi, pembinaan staf, pelaksanaan program kerja, serta kegiatan perusahaan.", "tj": "Memastikan perangkat dan jaringan IT berjalan dengan baik, menjaga kualitas pekerjaan, serta membina staf sesuai aturan dan standar perusahaan.", "wew": "Bertanggung jawab dalam penanganan permasalahan hardware dan keamanan jaringan, memberikan masukan untuk pengembangan IT, serta membina dan mengelola staf guna mendukung efektivitas kerja."}, {"nama": "Vita Permatasari", "jabatan": "Staf Pemasaran", "dept": "Marketing & Sales", "unit": "Marketing", "fungsi": "Melaksanakan kegiatan event dan admin di Marketing & Sales", "rutin": "Melaksanakan kegiatan event seperti tim medis, seminar dan kegiatan yang berhubungan dengan admin (keperluan permintaan barang departemen, keuangan kasbon)", "tj": "Melaksanakan kegiatan event seperti tim medis, seminar dan kegiatan yang berhubungan dengan admin (keperluan permintaan barang departemen, keuangan kasbon)", "wew": "Melaksanakan kegiatan event seperti tim medis, seminar dan kegiatan yang berhubungan dengan admin (keperluan permintaan barang departemen, keuangan kasbon)"}, {"nama": "Nurul kusuma Wardani", "jabatan": "Staf admisi dan billing bedah saraf kortex", "dept": "Marketing & Sales", "unit": "Marketing dan sales", "fungsi": "Fungsi dari jabatan saya adalah mempermudah,dan mempercepat pelayanan pasien dalam melakukan proses pemeriksaan di RS jih", "rutin": "Tugas rutin saya adalah melakukan pendaftaran dan pembayaran dan proses pre operation", "tj": "Tanggung jawab saya adalah merahasiakan semua data pasien dan tidak melakukan kerugian dan menyalah gunakan data data pasien", "wew": "Hak/Wewenang yang saya boleh lakukan adalah apabila terjadi kesalahpahaman yang merugikan diri saya sendiri saya bisa minta pengaduan yang adil dengan bagian yang bertanggung jawab."}, {"nama": "Efvina Goemawati", "jabatan": "Officer", "dept": "Marketing & Sales", "unit": "Pricing Analyst", "fungsi": "Mambantu proses pembuatan tarif sampai bisa digunakan di layanan, sosialisasi kepada departemen terkait, Dan mendokumentasikan", "rutin": "Menerima pengajuan tarif baru dan revisi\n Mengolah tarif dan koordinasi dengan dept accounting , unit pengaju \n Melengkapi komponen pengajuan tarif yg blm lengkap\n Memproses tarif sesuai ketentuan perusahaan\n Koordinasi dengan sales terkait benchmark \n Koordinasi dg IT terkait kode kode layanan\n Dokumentasi layanan pengajuan tarif\n Sosialisasi dg internal \n Koordinasi dg sales untuk sosialisasi pihak asuransi\n Menyiapkan buku tarif \n Dll", "tj": "Membuat layanan pada sistem yg telah di acc\n Kerja Sama dengan sales untuk sosialisasi tarif kepada asuransi\n Melakukan pekerjaan sesuai SOP", "wew": "Dapat mengakses atau meminta data” untuk menunjang pembuatan tarif\n Memberikan informasi tarif pada unit lain"}, {"nama": "Eka Rochmah N", "jabatan": "Spv procurement", "dept": "Procurement", "unit": "Procurement", "fungsi": "- Pengelola departement Procurement dari perencanaan menyusun program dan melakukan evaluasi dalam pengembangan departemen", "rutin": "Melakukan approve PO dari 0 rupiah", "tj": "Menjaga hubungan kerja dengan vendor secara profesional dengan semangat paksa intregritas, melakukan evaluasi kinerja", "wew": "Menugaskan karyawan untuk melakukan lembur demi penyelesaian target pekerjaan bisa diperlukan"}, {"nama": "Waris Sugiarto", "jabatan": "Staf", "dept": "Procurement", "unit": "Pengadaan umum", "fungsi": "Mengadakan barang dengan spesifikasi dengan standar (kwalitas & kuantitas) dengan harga yg relatif sesuai d Ngan standar tersebut", "rutin": "Mengadakan barang sesuai standar yg diinginkan permintaan\n \n Memastikan barang ke rekanan termasuk kwalitas (standar) kuantitas (stock) harga maupun estimasi barang bisa diterima", "tj": "Tanggung jawab dan berkewajiban terhadap barang yg diminta sesuai dengan standar kualitas.kwantitas yg diminta. Ketersediaan barang sampai barang bisa diterima", "wew": "Terhadap vendor berhak menawar hrga dari penawaran"}]</script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const fmt=n=>String(n).replace(".",",");
+const ANGKET=JSON.parse($("#angket-data").textContent);
+let R=null,FTE={};          // FTE: {namaSheet:[aktivitas,...]}
+const lines=id=>$(id).value.split("\n").map(x=>x.trim()).filter(Boolean);
+const count=()=>{$("#cU").textContent=lines("#tU").length+" uraian";$("#cF").textContent=lines("#tF").length+" uraian"};
+$("#tU").oninput=$("#tF").oninput=count;
 function msg(t,e){const m=$("#msg");m.textContent=t;m.className=e?"err":""}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const flat=x=>String(x).toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
 
-/*PURE*/
-const CATS={fungsi:"Fungsi utama",rutin:"Tugas rutin",tj:"Tanggung jawab",wew:"Hak/wewenang"};
-function splitItems(t){
-  return String(t==null?"":t).replace(/\r/g,"").split(/\n|(?<=\S)\s+(?=\d{1,2}[.)]\s)|\s*[•*]\s*/)
-    .map(x=>x.replace(/^\s*(\d{1,2}[.)]|[-–•*])\s*/,"").replace(/\s+/g," ").trim()).filter(x=>x.length>3);
+/* ==== ANGKET: pilih responden dan pecah teks menjadi uraian ==== */
+const deptOf=a=>a.dept||"Lainnya";
+function fillResp(){
+  const d=$("#dept").value,list=ANGKET.map((a,i)=>[i,a]).filter(([i,a])=>!d||deptOf(a)===d);
+  $("#resp").innerHTML=`<option value="">— pilih responden (${list.length}) —</option>`+list.map(([i,a])=>`<option value="${i}">${esc(a.nama)} – ${esc(a.jabatan)}${a.unit?" ("+esc(a.unit)+")":""}</option>`).join("");
 }
-function parseAngket(rows){
-  const hi=rows.findIndex(r=>r.some(c=>/nama lengkap/i.test(String(c))));
-  if(hi<0)throw new Error('Baris judul tidak ditemukan (harus ada kolom "Nama Lengkap").');
-  const H=rows[hi].map(c=>String(c==null?"":c));
-  const find=re=>H.findIndex(h=>re.test(h));
-  const ix={nama:find(/nama lengkap/i),jab:find(/^\s*jabatan/i),dept:find(/departemen/i),unit:find(/^\s*unit/i),
-    fungsi:find(/fungsi utama/i),rutin:find(/tugas rutin/i),tj:find(/kewajiban/i),wew:find(/wewenang/i)};
-  const miss=Object.keys(ix).filter(k=>ix[k]<0);
-  if(miss.length)throw new Error("Kolom tidak ditemukan: "+miss.join(", "));
-  const g=(r,k)=>String(r[ix[k]]==null?"":r[ix[k]]).trim();
-  return rows.slice(hi+1).filter(r=>g(r,"nama")).map((r,i)=>({id:i,nama:g(r,"nama"),jab:g(r,"jab"),dept:g(r,"dept"),unit:g(r,"unit"),
-    a:{fungsi:g(r,"fungsi"),rutin:g(r,"rutin"),tj:g(r,"tj"),wew:g(r,"wew")}}));
-}
-const tok=s=>String(s).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(w=>w.length>2&&!["dan","the","area","yang"].includes(w));
-function simScore(q,r){
-  const t=tok(q);if(!t.length)return 0;
-  const hay=tok(r.jab+" "+r.unit+" "+r.dept),hj=tok(r.jab);
-  return t.reduce((a,w)=>a+(hj.includes(w)?2:hay.includes(w)?1:0),0);
-}
-const ZW=/[\u200b\u200c\u200d\ufeff]/g;
-const HDR_RE=/(Halaman\s*:\s*\d+\s*dari\s*\d+|No\.?\s*Dokumen\s*:\s*[\d.]+|No\.?\s*Revisi\s*:\s*\d+|Tgl\.?\s*Berlaku\s*:\s*[\d.\-\/\s]*\d)/gi;
-const SEC=[[/^identitas jabatan$/i,"skip"],[/^hubungan kerja$/i,"skip"],[/^fungsi utama( jabatan)?$/i,"fungsi"],[/^tugas rutin$/i,"rutin"],[/^tanggung ?jawab$/i,"tj"],[/^(hak dan )?(wewenang|kewenangan)$/i,"wew"],[/^(kualifikasi|persyaratan|syarat)[a-z ]*$/i,"skip"],[/^(struktur organisasi|pengawasan|mengetahui|disusun oleh|disetujui oleh|diperiksa oleh|pemegang jabatan|atasan)\s*:?$/i,"skip"]];
-function secOf(l){const t=l.replace(/\s*:\s*$/,"").trim();for(const [re,k] of SEC)if(re.test(t))return k;return null}
-function groupItems(L,joinAll){
-  const num=/^\d{1,3}[.)]\s*/,out=[];
-  if(joinAll)return [L.join(" ").replace(/\s+/g," ").trim()].filter(Boolean);
-  if(L.filter(l=>num.test(l)).length>=2){L.forEach(l=>{if(num.test(l))out.push(l.replace(num,""));else if(out.length)out[out.length-1]+=" "+l})}
-  else L.forEach(l=>{if(out.length&&/^[a-z(,]/.test(l))out[out.length-1]+=" "+l;else out.push(l)});
-  return out.map(x=>x.replace(/\s+/g," ").trim()).filter(x=>x.length>3);
-}
-function parseUtw(raw){
-  const L=raw.map(l=>String(l).replace(ZW,"").replace(HDR_RE," ").replace(/\bURAIAN TUGAS\b|\bDAN WEWENANG\b/g," ").replace(/\s+/g," ").trim()).filter(Boolean);
-  const buf={fungsi:[],rutin:[],tj:[],wew:[]};let cur=null,jab="",found=0;
-  L.forEach(l=>{
-    const k=secOf(l);
-    if(k){cur=k;if(k!=="skip")found++;return}
-    const mj=l.match(/^Nama Jabatan\s*:\s*(.+)$/i);if(mj&&!jab)jab=mj[1].trim();
-    if(cur&&cur!=="skip")buf[cur].push(l);
+(function(){
+  const ds=[...new Set(ANGKET.map(deptOf))].sort(),n=d=>ANGKET.filter(a=>deptOf(a)===d).length;
+  $("#dept").innerHTML=`<option value="">Semua departemen (${ANGKET.length})</option>`+ds.map(d=>`<option value="${esc(d)}">${esc(d)} (${n(d)})</option>`).join("");
+  fillResp();
+})();
+$("#dept").onchange=fillResp;
+function splitItems(text,brk){
+  const out=[];
+  String(text||"").split(/\r?\n/).forEach(raw=>{
+    const line=raw.replace(/^\s*(?:\(\s*\d+\s*\)|\d+\s*[.)]|[*•\-–]+)\s*/,"").replace(/\s+/g," ").trim();
+    if(!line)return;
+    let parts=[line];
+    if(brk){
+      parts=line.split(/\s*;\s*|\.\s+(?=[A-Z])/).flatMap(p=>{
+        if((p.match(/,/g)||[]).length<2)return [p];
+        const segs=p.split(/,\s+(?:serta\s+|dan\s+)?/i),m=[];
+        segs.forEach(s=>{if(m.length&&s.split(" ").length<3)m[m.length-1]+=", "+s;else m.push(s)});
+        return m;
+      });
+    }
+    parts.forEach(p=>{p=p.replace(/[.\s]+$/,"").trim();if(p.length>3)out.push(p)});
   });
-  const sec={};Object.keys(buf).forEach(k=>sec[k]=groupItems(buf[k],k==="fungsi"));
-  return{jab,found,sec};
+  return out;
 }
-function buildItems(resps,cats){
-  const items=[];
-  resps.forEach(r=>cats.forEach(c=>splitItems(r.a[c]).forEach(txt=>items.push({txt,cat:CATS[c],who:r.nama}))));
-  return items;
+function fillAngket(){
+  const i=$("#resp").value;if(i==="")return;
+  const a=ANGKET[+i],brk=$("#brk").checked,seen=new Set(),out=[];
+  splitItems(a.rutin,brk).forEach(t=>{const key=flat(t);if(!seen.has(key)){seen.add(key);out.push(t)}});
+  $("#tU").value=out.join("\n");count();
 }
-/*ENDPURE*/
+$("#resp").onchange=fillAngket;
+$("#brk").onchange=fillAngket;
 
-const ANGKET_BAWAAN=[];
-let AK=[],R=null;
-const lines=()=>$("#ut").value.split("\n").map(x=>x.trim()).filter(Boolean);
-const chosen=()=>$$("#rl input:checked").map(i=>AK[+i.value]);
-$("#ut").oninput=()=>$("#uc").textContent=lines().length+" uraian";
-
-/* --- UTW dari Excel --- */
-let uRows=null;
-function fillU(){const i=+$("#usel").value;
-  $("#ut").value=uRows.filter((r,k)=>!(k===0&&/uraian|tugas|kegiatan|aktivitas|no\.?$/i.test(String(r[i]==null?"":r[i]))&&String(r[i]).length<40)).map(r=>String(r[i]==null?"":r[i]).replace(/^\s*\d+[.)]\s+/,"").replace(/\s+/g," ").trim()).filter(x=>x.length>3).join("\n");
-  $("#ut").oninput()}
-$("#usel").onchange=fillU;
-const cleanU=x=>String(x==null?"":x).replace(ZW,"").replace(/^\s*(\d+[.)]|[-–•*])\s+/,"").replace(/\s+/g," ").trim();
-const noise=x=>x.length<=3||/^(halaman|page)\s*\d+/i.test(x)||/^\d+(\s*(dari|of|\/)\s*\d+)?$/.test(x);
-let UT=null;
-const SECN={fungsi:"Fungsi utama",rutin:"Tugas rutin",tj:"Tanggung jawab",wew:"Wewenang"};
-function applyUt(){
-  if(!UT)return;
-  const on=$$(".usec:checked").map(c=>c.value);
-  $("#ut").value=on.flatMap(k=>UT.sec[k]).join("\n");$("#ut").oninput();
-  $("#utinfo").textContent="Terbaca dari dokumen: "+Object.keys(SECN).map(k=>SECN[k]+" "+UT.sec[k].length).join(", ")+". Nomor dokumen, tanggal berlaku, identitas, hubungan kerja, dan judul bagian tidak ikut.";
-}
-$$(".usec").forEach(c=>c.onchange=applyUt);
-function useParsed(P){
-  UT=P;$("#usecs").classList.remove("hidden");$("#usel").classList.add("hidden");uRows=null;applyUt();
-  if(P.jab&&!$("#jab").value.trim()){$("#jab").value=P.jab;$("#jab").oninput()}
-}
-function mergeLower(out){const m=[];out.forEach(l=>{if(m.length&&/^[a-z(,]/.test(l)&&!/^\s*(\d+[.)]|[-•*])\s/.test(l))m[m.length-1]+=" "+l;else m.push(l)});return m}
-function setLines(L){UT=null;$("#usecs").classList.add("hidden");$("#usel").classList.add("hidden");uRows=null;$("#ut").value=L.map(cleanU).filter(x=>!noise(x)).join("\n");$("#ut").oninput()}
-function setOrParse(L){const P=parseUtw(L);if(P.found>=2)useParsed(P);else setLines(mergeLower(L))}
-async function readPdfU(f){
-  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise,out=[];
-  for(let n=1;n<=pdf.numPages;n++){
-    const items=(await(await pdf.getPage(n)).getTextContent()).items.filter(i=>i.str.trim()),ls=[];
-    items.forEach(i=>{const y=i.transform[5],l=ls.find(l=>Math.abs(l.y-y)<3);l?l.t.push(i):ls.push({y,t:[i]})});
-    ls.sort((a,b)=>b.y-a.y).forEach(l=>out.push(l.t.sort((a,b)=>a.transform[4]-b.transform[4]).map(i=>i.str).join(" ").replace(/\s+/g," ").trim()));
+/* ==== FTE: baca kolom "Aktivities" tiap sheet ==== */
+function parseSheet(ws){
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+  let hr=-1,col=-1;
+  for(let r=0;r<Math.min(rows.length,40)&&hr<0;r++)
+    rows[r].forEach((v,c)=>{if(hr<0&&/^\s*aktivit/i.test(String(v))){hr=r;col=c}});
+  if(hr<0){ // cadangan: kolom dengan teks terbanyak
+    const w=Math.max(...rows.map(r=>r.length),1);let best=-1,bs=0;
+    for(let c=0;c<w;c++){const s=rows.reduce((a,r)=>a+(String(r[c]??"").length>3?String(r[c]).length:0),0);if(s>bs){bs=s;best=c}}
+    col=best;hr=-1;
+  }
+  const out=[];
+  for(let r=hr+1;r<rows.length;r++){
+    if(rows[r].some(v=>/total\s*fte/i.test(String(v))))break;
+    const v=String(rows[r][col]??"").replace(/\s+/g," ").trim();
+    if(v.length>3&&isNaN(Number(v)))out.push(v);
   }
   return out;
 }
-async function readDocxU(f){
-  const h=(await mammoth.convertToHtml({arrayBuffer:await f.arrayBuffer()})).value;
-  const d=new DOMParser().parseFromString(h,"text/html");
-  const els=[...d.body.querySelectorAll("p,li,h1,h2,h3,h4,h5,h6")].filter(e=>!e.querySelector("p,li,h1,h2,h3,h4,h5,h6"));
-  const lines=els.map(e=>e.textContent.trim()).filter(Boolean);
-  if(parseUtw(lines).found>=2)return{lines};
-  const trs=[...d.querySelectorAll("tr")];
-  if(trs.length)return{rows:trs.map(tr=>[...tr.cells].map(c=>c.textContent.trim()))};
-  return{lines};
+function fillFte(){
+  const s=$("#fsheet").value;
+  $("#tF").value=(s==="__all__"?Object.values(FTE).flat():FTE[s]||[]).join("\n");count();
 }
-$("#fu").onchange=async()=>{
-  const f=$("#fu").files[0];if(!f)return;
+$("#fsheet").onchange=fillFte;
+$("#fte").onchange=async()=>{
+  const f=$("#fte").files[0];if(!f)return;
   try{
-    if(/\.txt$/i.test(f.name)){setOrParse((await f.text()).split(/\r?\n/));return}
-    if(/\.pdf$/i.test(f.name)){msg("Membaca PDF…");setOrParse(await readPdfU(f));msg("");return}
-    if(/\.doc$/i.test(f.name)){return msg("Format .doc lama tidak didukung. Simpan ulang sebagai .docx.",1)}
-    if(/\.docx$/i.test(f.name)){msg("Membaca Word…");const d=await readDocxU(f);msg("");
-      if(d.lines){setOrParse(d.lines);return}uRows=d.rows}
-    else{const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
-      uRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""})}
-    UT=null;$("#usecs").classList.add("hidden");
-    const w=Math.max(...uRows.map(r=>r.length),1),sc=[];
-    for(let c=0;c<w;c++)sc.push(uRows.reduce((a,r)=>a+(String(r[c]==null?"":r[c]).length>3?String(r[c]).length:0),0));
-    $("#usel").innerHTML=sc.map((_,c)=>`<option value="${c}">Kolom ${c+1}${uRows[0]&&uRows[0][c]?" – "+esc(String(uRows[0][c]).slice(0,30)):""}</option>`).join("");
-    $("#usel").value=sc.indexOf(Math.max(...sc));$("#usel").classList.remove("hidden");fillU();
-  }catch(e){msg("Gagal membaca file UTW: "+e.message,1)}
+    const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});FTE={};
+    wb.SheetNames.forEach(n=>{const it=parseSheet(wb.Sheets[n]);if(it.length)FTE[n]=it});
+    const names=Object.keys(FTE);
+    if(!names.length)return msg("Tidak ada uraian aktivitas yang ditemukan di file FTE.",1);
+    $("#fsheet").innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)} (${FTE[n].length} aktivitas)</option>`).join("")+(names.length>1?`<option value="__all__">Semua sheet digabung (${Object.values(FTE).flat().length} aktivitas)</option>`:"");
+    $("#fsheet").classList.remove("hidden");fillFte();msg("");
+  }catch(e){msg("Gagal membaca file: "+e.message,1)}
 };
 
-/* --- Angket --- */
-const SKEY="angket_utw_update_v1",rk=r=>(r.nama+"|"+r.dept).toLowerCase().replace(/\s+/g," ").trim();
-function saveAK(){try{localStorage.setItem(SKEY,JSON.stringify(AK))}catch(e){}}
-function loadAK(){try{const v=JSON.parse(localStorage.getItem(SKEY)||"null");if(Array.isArray(v)&&v.length)return v}catch(e){}return null}
-$("#fa").onchange=async()=>{
-  const f=$("#fa").files[0];if(!f)return;
-  try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:"",raw:false});
-    const N=parseAngket(rows),mode=document.querySelector("input[name=um]:checked").value;
-    let info;
-    if(mode==="ganti"){AK=N.map((r,i)=>({...r,id:i}));info="Diganti: "+AK.length+" responden dari file.";}
-    else{
-      const idx=new Map(AK.map((r,i)=>[rk(r),i]));let baru=0,upd=0,sama=0;
-      N.forEach(r=>{const k=rk(r);
-        if(idx.has(k)){const o=AK[idx.get(k)];
-          if(JSON.stringify([o.jab,o.unit,o.a])===JSON.stringify([r.jab,r.unit,r.a]))sama++;
-          else{AK[idx.get(k)]={...r,id:o.id};upd++}}
-        else{AK.push({...r,id:AK.length});idx.set(k,AK.length-1);baru++}});
-      info=`Digabung: ${baru} responden baru, ${upd} diperbarui, ${sama} tidak berubah. Total ${AK.length}.`;
-    }
-    saveAK();$("#uinfo").textContent=info+" Tersimpan di browser ini.";
-    initDept();renderR(false);msg("");$("#fa").value="";
-  }catch(e){msg("Gagal membaca angket: "+e.message,1)}
-};
-$("#rst").onclick=()=>{try{localStorage.removeItem(SKEY)}catch(e){}AK=ANGKET_BAWAAN.map(r=>({...r}));initDept();renderR(false);$("#uinfo").textContent="Dikembalikan ke angket bawaan.";};
-function initDept(){
-  const ds=[...new Set(AK.map(r=>r.dept).filter(Boolean))].sort();
-  $("#dept").innerHTML='<option value="">Semua departemen</option>'+ds.map(d=>`<option>${esc(d)}</option>`).join("");
-  $("#dept").classList.remove("hidden");
-  $("#fai").textContent=(loadAK()?"Angket (sudah diupdate): ":"Angket kosong, unggah lewat Update angket: ")+AK.length+" responden dari "+ds.length+" departemen.";
-}
-function renderR(keep){
-  const keepIds=keep?new Set():new Set(chosen().map(r=>r.id)),d=$("#dept").value,q=$("#jab").value;
-  const L=AK.filter(r=>!d||r.dept===d).map(r=>({r,s:simScore(q,r)})).sort((a,b)=>b.s-a.s||a.r.id-b.r.id);
-  const top=L.length&&L[0].s>0?L[0].s:-1;
-  $("#rl").innerHTML=L.length?L.map(({r,s})=>`<label><input type="checkbox" value="${r.id}"${keepIds.has(r.id)?" checked":""}> <strong>${esc(r.nama)}</strong> — ${esc(r.jab||"-")} <small>· ${esc(r.unit||"-")} · ${esc(r.dept||"-")}</small>${s>0&&s>=top?' <span class="mirip">mirip</span>':""}</label>`).join(""):'<div class="hint" style="padding:10px">Tidak ada responden.</div>';
-  cnt();
-}
-function cnt(){const c=chosen();$("#rc").textContent=c.length+" responden dipilih";}
-$("#dept").onchange=()=>renderR(false);
-AK=loadAK()||ANGKET_BAWAAN.map(r=>({...r}));initDept();renderR(true);if(loadAK())$("#uinfo").textContent="Memakai angket hasil update yang tersimpan di browser ini.";
-$("#jab").oninput=()=>{if(AK.length)renderR(false)};
-$("#rl").onchange=cnt;
-
-/* ==== Worker ==== */
-const CHUNK=8;
-let CTL=null;
-const ERR={not_granted:"Izin memakai Claude belum diberikan. Muat ulang halaman dan izinkan saat diminta.",sampling_disabled:"Claude tidak tersedia untuk akun ini.",rate_limited:"Terlalu sering memanggil Claude atau batas pemakaianmu tercapai. Coba lagi nanti.",session_expired:"Sesi berakhir. Masuk ulang ke claude.ai.",prompt_too_large:"Data terlalu besar untuk satu permintaan.",upstream_error:"Gangguan sementara pada Claude. Coba lagi.",refused:"Claude menolak permintaan ini.",empty_completion:"Claude tidak memberi jawaban."};
-const HARDCODED_WORKER_URL='https://so-proxy.mnaufansidiq.workers.dev/';
-const WORKER_TIMEOUT=90000;
-async function callWorker(prompt){
-  const tc=new AbortController();
-  const timer=setTimeout(()=>tc.abort("timeout"),WORKER_TIMEOUT);
-  const onAbort=()=>tc.abort("user");
-  if(CTL)CTL.signal.addEventListener("abort",onAbort);
-  try{
-    const response=await fetch(HARDCODED_WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt}),signal:tc.signal});
-    let data=null;try{data=await response.json()}catch(e){}
-    if(!response.ok)throw new Error((data&&data.error)?data.error:("Worker mengembalikan status "+response.status));
-    const text=(data&&data.text?data.text:"").trim();
-    if(!text)throw new Error("AI tidak memberikan hasil apa pun.");
-    return{text,provider:(data&&data.provider)||"?",modelUsed:(data&&data.modelUsed)||"?"};
-  }catch(e){
-    if(tc.signal.aborted){
-      if(tc.signal.reason==="user"){const t=new Error("Dibatalkan.");t.code="cancelled";throw t}
-      throw new Error("Permintaan ke AI terlalu lama (timeout "+(WORKER_TIMEOUT/1000)+" detik).");
-    }
-    throw e;
-  }finally{clearTimeout(timer);if(CTL)CTL.signal.removeEventListener("abort",onAbort)}
+/* ==== KONFIGURASI: URL Cloudflare Worker (kirim {prompt}, balasan {text}) ==== */
+const WORKER_URL="https://so-proxy.mnaufansidiq.workers.dev/";
+const CHUNK=40; // jumlah uraian Angket per permintaan AI (semua sekaligus bila ≤ 40)
+async function callWorker(prompt,ms=90000){
+  // timeout tanpa AbortSignal (signal tidak bisa disalin di sebagian lingkungan/iframe)
+  let last;
+  for(let a=1;a<=2;a++){
+    let timer;
+    try{
+      const r=await Promise.race([
+        fetch(WORKER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,timeoutMs:80000,maxTokens:8192})}),
+        new Promise((_,rej)=>{timer=setTimeout(()=>rej(new Error("AI tidak merespons (timeout).")),ms)})
+      ]);
+      clearTimeout(timer);
+      let d=null;try{d=await r.json()}catch(e){}
+      if(!r.ok){
+        if(a===1&&(r.status===429||r.status>=500)){await new Promise(x=>setTimeout(x,1000));continue}
+        throw new Error(d&&d.error?d.error:"Worker mengembalikan status "+r.status);
+      }
+      const text=(d&&d.text||"").trim();
+      if(!text)throw new Error("AI tidak memberikan hasil.");
+      return {text,provider:(d&&d.provider)||"?",modelUsed:(d&&d.modelUsed)||"?"};
+    }catch(e){clearTimeout(timer);last=e;if(a===2)break}
+  }
+  throw last;
 }
 const parseJ=t=>JSON.parse(t.replace(/```json|```/g,"").trim().replace(/^[^{]*/,"").replace(/[^}]*$/,""));
 const CRIT=`KRITERIA (terapkan ketat dan konsisten):
-- Sesuai: ada butir jawaban karyawan yang kegiatan intinya, objeknya, dan tujuannya sama dengan UTW; hanya berbeda redaksi atau tingkat rincian.
-- Sebagian: ada butir jawaban yang menyangkut kegiatan/objek yang sama tetapi cakupannya hanya sebagian dari UTW (atau jawaban hanya sebagian dari UTW), atau hanya salah satu langkahnya yang tercakup.
-- Tidak: tidak ada butir jawaban yang cakupannya sama. Jangan menebak. Kemiripan kata umum (barang, unit, data, koordinasi, laporan, rapat, sistem) BUKAN alasan untuk Sesuai atau Sebagian. Jawaban yang terlalu umum atau tidak informatif (misalnya "sesuai UTW", "menjalankan arahan atasan", "semua unit", "hak ada di atasan") tidak boleh dijadikan dasar Sesuai atau Sebagian.
-- Pilih paling banyak 3 butir jawaban per UTW, hanya yang benar-benar relevan.`;
+- Sesuai: ada FTE yang kegiatan intinya, objeknya, dan tujuannya sama dengan uraian Angket; hanya berbeda redaksi atau tingkat rincian.
+- Sebagian: ada FTE yang menyangkut kegiatan/objek yang sama tetapi cakupannya hanya sebagian dari uraian Angket (atau uraian Angket hanya sebagian dari FTE), atau hanya salah satu langkahnya yang tercakup.
+- Tidak: tidak ada FTE yang cakupannya sama. Jangan menebak. Kemiripan kata umum (barang, unit, data, koordinasi, laporan, rapat, sistem) BUKAN alasan untuk Sesuai atau Sebagian.
+- Pilih paling banyak 3 FTE per uraian Angket, hanya yang benar-benar relevan.
+- Uraian Angket berasal dari isian pegawai (tugas rutin, tanggung jawab, wewenang) dan bisa berbahasa bebas atau memakai singkatan; nilai MAKNA kegiatannya. Pernyataan yang terlalu umum (misalnya "menjalankan tugas dari atasan", "menjaga kerahasiaan") tanpa kegiatan spesifik yang ada di FTE dinilai Tidak.`;
 const FMT=`Balas HANYA JSON valid, tanpa teks lain dan tanpa pagar kode:
 {"hasil":[{"u":1,"f":[2,5],"s":"Sesuai","alasan":"..."}]}
-"u" = nomor UTW persis seperti pada daftar. "f" = nomor butir jawaban angket yang cocok (kosong jika status Tidak; wajib terisi jika Sesuai atau Sebagian). "s" HANYA salah satu kata ini: Sesuai, Sebagian, Tidak (tanpa tambahan apa pun). "alasan" = satu kalimat yang menjelaskan MENGAPA cocok atau tidak, dengan menyebut nomor butir jawaban. JANGAN menyalin ulang teks UTW ke "alasan". Contoh alasan: "Jawaban 3 mencakup verifikasi faktur pajak yang sama dengan UTW." atau "Tidak ada jawaban yang membahas penyimpanan barang ke gudang."`;
-const fmtA=A=>A.map((x,i)=>(i+1)+". ["+x.cat+"] "+x.txt).join("\n");
-const mkPrompt=(items,A,jab)=>`Kamu analis jabatan yang teliti dan konservatif. Tugasmu: menilai kesesuaian SUBSTANSI (makna kegiatan, bukan kesamaan kata) antara setiap uraian tugas UTW${jab?' jabatan "'+jab+'"':""} dan jawaban angket karyawan pemegang jabatan itu. Tanda [..] di depan jawaban hanya menunjukkan bagian angket asalnya.
+"u" = nomor Angket persis seperti pada daftar. "f" = nomor FTE yang cocok (kosong jika status Tidak; wajib terisi jika Sesuai atau Sebagian). "s" HANYA salah satu kata ini: Sesuai, Sebagian, Tidak (tanpa tambahan apa pun). "alasan" = satu kalimat yang menjelaskan MENGAPA cocok atau tidak, dengan menyebut nomor FTE. JANGAN menyalin ulang teks Angket ke "alasan". Contoh alasan: "FTE 3 mencakup pendampingan instalasi oleh vendor yang sama dengan uraian Angket." atau "Tidak ada FTE yang membahas penyimpanan barang ke gudang."`;
+const mkPrompt=(items,F)=>`Kamu analis jabatan yang teliti dan konservatif. Tugasmu: menilai kesesuaian SUBSTANSI (makna kegiatan, bukan kesamaan kata) antara setiap uraian Angket dan daftar uraian FTE.
 
 ${CRIT}
-Baca SELURUH jawaban angket sebelum memilih. Buat satu objek untuk SETIAP UTW di bawah (jangan ada yang terlewat).
+Baca SELURUH daftar FTE sebelum memilih. Buat satu objek untuk SETIAP uraian Angket di bawah (jangan ada yang terlewat).
 
 ${FMT}
 
-DAFTAR UTW:
+DAFTAR ANGKET:
 ${items.map(([n,x])=>n+". "+x).join("\n")}
 
-JAWABAN ANGKET:
-${fmtA(A)}`;
-const mkVerify=(rows,A)=>`Kamu pemeriksa mutu analisis jabatan yang SKEPTIS. Di bawah ini hasil pencocokan awal UTW dengan jawaban angket karyawan. Periksa ulang setiap butir: apakah jawaban yang dipilih benar-benar mencakup kegiatan UTW? Turunkan status (Sesuai menjadi Sebagian, atau Sebagian menjadi Tidak) dan/atau buang jawaban yang tidak relevan bila kecocokannya hanya karena kata umum mirip. Naikkan status hanya bila penilaian awal jelas keliru. Pertahankan bila sudah tepat.
+DAFTAR FTE:
+${F.map((x,i)=>(i+1)+". "+x).join("\n")}`;
+const mkVerify=(rows,F)=>`Kamu pemeriksa mutu analisis jabatan yang SKEPTIS. Di bawah ini hasil pencocokan awal uraian Angket dengan FTE. Periksa ulang setiap butir: apakah FTE yang dipilih benar-benar mencakup kegiatan pada uraian Angket? Turunkan status (Sesuai menjadi Sebagian, atau Sebagian menjadi Tidak) dan/atau buang FTE yang tidak relevan bila kecocokannya hanya karena kata umum mirip. Naikkan status hanya bila penilaian awal jelas keliru. Pertahankan bila sudah tepat.
 
 ${CRIT}
 
@@ -329,14 +219,13 @@ ${FMT}
 Buat satu objek untuk SETIAP butir di bawah.
 
 HASIL AWAL:
-${rows.map(r=>r.u+". UTW: "+r.text+"\n   Status awal: "+r.s+"\n   Jawaban terpilih:\n"+r.f.map(k=>"   - Jawaban "+k+": "+A[k-1].txt).join("\n")).join("\n\n")}`;
+${rows.map(r=>r.u+". ANGKET: "+r.text+"\n   Status awal: "+r.s+"\n   FTE terpilih:\n"+r.f.map(k=>"   - FTE "+k+": "+F[k-1]).join("\n")).join("\n\n")}`;
 const OKS=["Sesuai","Sebagian","Tidak"];
 function normS(s){s=String(s||"").trim();const m=OKS.find(o=>o.toLowerCase()===s.toLowerCase());if(m)return m;
-  for(const o of OKS)if(new RegExp("^"+o,"i").test(s)&&s.length<20)return o;return null}
-const flat=x=>String(x).toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+  if(/^tidak/i.test(s)&&s.length<20)return "Tidak";if(/^sebagian/i.test(s)&&s.length<20)return "Sebagian";if(/^sesuai/i.test(s)&&s.length<20)return "Sesuai";return null}
 function cleanItem(h,nF,utxt,lenient){
   if(!h)return null;
-  const s=normS(h.s);
+  let s=normS(h.s);
   let f=Array.isArray(h.f)?h.f.map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=nF):[];
   f=[...new Set(f)].slice(0,3);
   const al=String(h.alasan||"").trim();
@@ -352,104 +241,95 @@ async function askRound(prompt,models){
   let j;
   for(let a=1;a<=2;a++){
     try{const r=await callWorker(prompt);models.add(r.provider+" ("+r.modelUsed+")");j=parseJ(r.text);break}
-    catch(e){if(e.code||a===2)throw e}
+    catch(e){if(a===2)throw e}
   }
   return j.hasil||[];
 }
-async function askPart(items,A,jab,models){
+async function askPart(items,F,models){
   const done=new Map(),raw=new Map();
   let todo=items;
   for(let round=1;round<=3&&todo.length;round++){
-    const got=await askRound(mkPrompt(todo,A,jab),models);
-    todo.forEach(([n,x])=>{const h=got.find(g=>Number(g.u)===n);if(h)raw.set(n,h);const c=cleanItem(h&&{...h,u:n},A.length,x,false);if(c)done.set(n,c)});
+    const got=await askRound(mkPrompt(todo,F),models);
+    todo.forEach(([n,x])=>{const h=got.find(g=>Number(g.u)===n);if(h)raw.set(n,h);const c=cleanItem(h&&{...h,u:n},F.length,x,false);if(c)done.set(n,c)});
     todo=items.filter(([n])=>!done.has(n));
   }
-  items.forEach(([n,x])=>{if(!done.has(n))done.set(n,cleanItem(raw.has(n)?{...raw.get(n),u:n}:{u:n},A.length,x,true))});
+  items.forEach(([n,x])=>{if(!done.has(n))done.set(n,cleanItem(raw.has(n)?{...raw.get(n),u:n}:{u:n},F.length,x,true))});
   return items.map(([n])=>done.get(n));
 }
-async function verifyPart(rows,A,models){
-  const got=await askRound(mkVerify(rows,A),models);
-  return rows.map(r=>{const g=got.find(g=>Number(g.u)===r.n);return cleanItem(g&&{...g,u:r.n},A.length,r.text,false)||null});
+async function verifyPart(rows,F,models){
+  const got=await askRound(mkVerify(rows,F),models);
+  return rows.map(r=>{const c=cleanItem(got.find(g=>Number(g.u)===r.n)&&{...got.find(g=>Number(g.u)===r.n),u:r.n},F.length,r.text,false);return c||null});
 }
-
-$("#stop").onclick=()=>{if(CTL)CTL.abort()};
 $("#go").onclick=async()=>{
-  const U=lines(),resps=chosen(),cats=$$(".cat:checked").map(c=>c.value);
-  if(!U.length)return msg("Isi uraian UTW terlebih dahulu.",1);
-  if(!AK.length)return msg("Data angket kosong.",1);
-  if(!resps.length)return msg("Pilih minimal satu responden.",1);
-  if(!cats.length)return msg("Pilih minimal satu bagian jawaban untuk dibandingkan.",1);
-  const A=buildItems(resps,cats);
-  if(!A.length)return msg("Responden terpilih tidak punya jawaban pada bagian yang dipilih.",1);
-  $("#go").disabled=true;$("#stop").classList.remove("hidden");CTL=new AbortController();
-  const models=new Set(),hasil=[],n=Math.ceil(U.length/CHUNK),jab=$("#jab").value.trim();
+  const U=lines("#tU"),F=lines("#tF");
+  if(!U.length||!F.length)return msg("Isi uraian Angket dan FTE terlebih dahulu.",1);
+  $("#go").disabled=true;
+  const models=new Set(),hasil=[],n=Math.ceil(U.length/CHUNK);
   try{
     for(let c=0;c<n;c++){
-      msg(`Tahap 1: AI mencocokkan (${c+1} dari ${n}). Bisa memakan 10–60 detik…`);
+      msg(`Tahap 1: AI mencocokkan (${c+1} dari ${n})…`);
       const st=c*CHUNK,items=U.slice(st,st+CHUNK).map((x,i)=>[st+i+1,x]);
-      (await askPart(items,A,jab,models)).forEach(h=>hasil.push(h));
+      (await askPart(items,F,models)).forEach(h=>hasil.push(h));
     }
     const cand=hasil.filter(h=>h.s!=="Tidak");
     for(let st=0;st<cand.length;st+=CHUNK){
       msg("Tahap 2: AI memeriksa ulang kecocokan yang terlalu longgar…");
       const part=cand.slice(st,st+CHUNK).map(h=>({n:h.u,u:h.u,text:U[h.u-1],s:h.s,f:h.f}));
-      let v=null;try{v=await verifyPart(part,A,models)}catch(e){if(e.code==="cancelled")throw e;v=null}
+      let v=null;try{v=await verifyPart(part,F,models)}catch(e){v=null}
       if(v)v.forEach((nv,i)=>{if(nv){const k=hasil.findIndex(h=>h.u===part[i].n);hasil[k]=nv}});
     }
     const used=new Set(hasil.flatMap(h=>h.s==="Tidak"?[]:(h.f||[])));
-    R={U,A,hasil,jab,resps:resps.map(r=>r.nama),fx:A.map((_,i)=>i+1).filter(i=>!used.has(i)),ovr:{}};
+    const ri=$("#resp").value,a=ri===""?null:ANGKET[+ri],fs=$("#fsheet").value;
+    const meta=[a?`Angket: ${a.nama} – ${a.jabatan}${a.dept?" ("+a.dept+")":""}`:"Angket: teks manual",
+      Object.keys(FTE).length?`FTE: ${fs==="__all__"?"semua sheet":fs}`:"FTE: teks manual"].join("  |  ");
+    R={U,F,hasil,meta,fx:F.map((_,i)=>i+1).filter(i=>!used.has(i))};
     render();
     const m=[...models].join(", "),fb=/workers-ai/i.test(m);
     msg("Dihasilkan oleh: "+m+(fb?" — ini model cadangan, hasilnya bisa kurang teliti. Coba lagi nanti saat model utama tersedia.":""),fb);
-  }catch(e){msg(e.code==="cancelled"?"Dibatalkan.":"Gagal memproses: "+(e.message||e),e.code!=="cancelled")}
-  $("#go").disabled=false;$("#stop").classList.add("hidden");
+  }catch(e){msg("Gagal memproses: "+(e.message||e)+". Coba lagi, atau periksa Worker dan kuota AI.",1)}
+  $("#go").disabled=false;
 };
 
-/* ---- Hasil ---- */
-const STS=["Sesuai","Sebagian","Tidak"],SK={Sesuai:1,Sebagian:0.5,Tidak:0};
-const aLabel=x=>`${esc(x.txt)} <span class="src">(${esc(x.cat)}, ${esc(x.who)})</span>`;
-const aPlain=x=>`${x.txt} (${x.cat}, ${x.who})`;
+const STS=["Sesuai","Sebagian","Tidak"],normStat=x=>STS.includes(x)?x:"Tidak";
 function rowsOf(){return R.U.map((u,i)=>{const h=R.hasil.find(x=>x.u===i+1)||{f:[],s:"Tidak",alasan:"-"};
-  return{no:i+1,u,f:(h.f||[]).map(k=>R.A[k-1]).filter(Boolean),s:R.ovr[i+1]||(STS.includes(h.s)?h.s:"Tidak"),a:h.alasan||"-"}})}
-function total(rs){const n=rs.length,t=rs.reduce((a,r)=>a+SK[r.s],0);return{n,t,p:n?Math.round(t/n*1000)/10:0}}
-const thr=()=>Math.min(100,Math.max(1,+$("#thr").value||50));
-const verdict=T=>T.p>=thr()?"YA":"TIDAK";
-function counts(rs){const c={Sesuai:0,Sebagian:0,Tidak:0};rs.forEach(r=>c[r.s]++);return c}
+  const ov=(R.ovr||{})[i+1];
+  return{no:i+1,u,f:(h.f||[]).map(n=>R.F[n-1]).filter(Boolean),s:ov||normStat(h.s),a:h.alasan||"-"}})}
+const SK={Sesuai:1,Sebagian:0.5,Tidak:0},fmt=n=>String(n).replace(".",",");
+function total(rs){const n=rs.length,t=rs.reduce((a,r)=>a+(SK[r.s]??0),0),r1=x=>Math.round(x*1000)/10;
+  return{t,n,p:n?r1(t/n):0}}
 function render(first=true){
-  const rs=rowsOf(),c=counts(rs),T=total(rs),v=verdict(T);
-  const vd=$("#vd");vd.textContent=`${fmt(T.p)}% → ${v}`;vd.className="verdict "+(v==="YA"?"Sesuai":"Tidak");
-  $("#sum").innerHTML=`<table style="min-width:0;width:auto"><thead><tr><th>Status</th><th>Skor per uraian</th><th>Jumlah uraian</th><th>Subtotal skor</th></tr></thead><tbody><tr><td>Sesuai</td><td>1</td><td>${c.Sesuai}</td><td>${fmt(c.Sesuai)}</td></tr><tr><td>Sebagian</td><td>0,5</td><td>${c.Sebagian}</td><td>${fmt(c.Sebagian*0.5)}</td></tr><tr><td>Tidak sesuai</td><td>0</td><td>${c.Tidak}</td><td>0</td></tr><tr><th>Total</th><th></th><th>${T.n}</th><th>${fmt(T.t)}</th></tr><tr><th colspan="3">Tingkat kesesuaian (total skor ÷ ${T.n} UTW)</th><th>${fmt(T.p)}%</th></tr></tbody></table>`;
-  $("#tb").innerHTML=rs.map(r=>`<tr><td>${r.no}</td><td>${esc(r.u)}</td><td>${r.f.length?r.f.map(aLabel).join("<br><br>"):"-"}</td><td><select class="st ${r.s}" data-n="${r.no}">${STS.map(o=>`<option value="${o}"${o===r.s?" selected":""}>${o==="Tidak"?"Tidak sesuai":o}</option>`).join("")}</select></td><td>${fmt(SK[r.s])}</td><td>${esc(r.a)}</td></tr>`).join("");
-  $("#fx").innerHTML=R.fx.length?R.fx.map(k=>`<li>${aLabel(R.A[k-1])}</li>`).join(""):"<li>Semua jawaban punya padanan.</li>";
+  const rs=rowsOf(),c={Sesuai:0,Sebagian:0,Tidak:0};rs.forEach(r=>c[r.s]=(c[r.s]||0)+1);
+  const T=total(rs);
+  $("#meta").textContent=R.meta||"";
+  $("#sum").innerHTML=`<table style="min-width:0;width:auto"><thead><tr><th>Status</th><th>Skor per uraian</th><th>Jumlah uraian</th><th>Subtotal skor</th></tr></thead><tbody><tr><td>Sesuai</td><td>1</td><td>${c.Sesuai}</td><td>${fmt(c.Sesuai)}</td></tr><tr><td>Sebagian</td><td>0,5</td><td>${c.Sebagian}</td><td>${fmt(c.Sebagian*0.5)}</td></tr><tr><td>Tidak sesuai</td><td>0</td><td>${c.Tidak}</td><td>0</td></tr><tr><th>Total</th><th></th><th>${T.n}</th><th>${fmt(T.t)}</th></tr><tr><th colspan="3">Tingkat kesesuaian (total skor ÷ ${T.n} Angket)</th><th>${fmt(T.p)}%</th></tr></tbody></table>`;
+  $("#tb").innerHTML=rs.map(r=>`<tr><td>${r.no}</td><td>${esc(r.u)}</td><td>${r.f.length?r.f.map(esc).join("<br><br>"):"-"}</td><td><select class="st ${r.s}" data-n="${r.no}">${STS.map(o=>`<option value="${o}"${o===r.s?" selected":""}>${o==="Tidak"?"Tidak sesuai":o}</option>`).join("")}</select></td><td>${fmt(SK[r.s]??0)}</td><td>${esc(r.a)}</td></tr>`).join("");
+  $("#fx").innerHTML=R.fx.length?R.fx.map(n=>`<li>${esc(R.F[n-1]||"")}</li>`).join(""):"<li>Semua FTE punya padanan.</li>";
   $("#out").classList.remove("hidden");if(first)$("#out").scrollIntoView({behavior:"smooth"});
 }
-$("#tb").onchange=e=>{const el=e.target.closest("select.st");if(!el||!R)return;R.ovr[+el.dataset.n]=el.value;render(false)};
-$("#thr").oninput=()=>{if(R)render(false)};
-$("#cp").onclick=async()=>{if(!R)return;const v=verdict(total(rowsOf()));
-  try{await navigator.clipboard.writeText(v);msg("Tersalin: "+v)}catch(e){msg("Hasil: "+v+" (salin manual, clipboard diblokir)")}};
 
-/* ---- Word ---- */
+$("#tb").onchange=e=>{const el=e.target.closest("select.st");if(!el||!R)return;R.ovr=R.ovr||{};R.ovr[+el.dataset.n]=el.value;render(false)};
 const P=(t,b)=>`<w:p><w:r>${b?"<w:rPr><w:b/></w:rPr>":""}<w:t xml:space="preserve">${esc(t)}</w:t></w:r></w:p>`;
 const TC=(t,w,b,fill)=>`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${fill?`<w:shd w:val="clear" w:fill="${fill}"/>`:""}</w:tcPr>${String(t).split("\n").map(x=>P(x,b)).join("")}</w:tc>`;
-const BR=["top","left","bottom","right","insideH","insideV"].map(s=>`<w:${s} w:val="single" w:sz="4" w:color="808080"/>`).join("");
+function sumDoc(c,rs){
+  const T=total(rs),W=[4200,2200,2200,2200];
+  const r=(a,b,fl)=>`<w:tr>${a.map((t,i)=>TC(t,W[i],b,fl)).join("")}</w:tr>`;
+  return `<w:tbl><w:tblPr><w:tblW w:w="10800" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(s=>`<w:${s} w:val="single" w:sz="4" w:color="808080"/>`).join("")}</w:tblBorders></w:tblPr>`+
+    r(["Status","Skor per uraian","Jumlah uraian","Subtotal skor"],1,"D9E2F3")+
+    r(["Sesuai","1",c.Sesuai,fmt(c.Sesuai)])+
+    r(["Sebagian","0,5",c.Sebagian,fmt(c.Sebagian*0.5)])+
+    r(["Tidak sesuai","0",c.Tidak,"0"])+
+    r(["Total","",T.n,fmt(T.t)],1,"F2F2F2")+
+    r([`Tingkat kesesuaian (total skor ÷ ${T.n} Angket)`,"","",fmt(T.p)+"%"],1,"F2F2F2")+`</w:tbl>`+P("");
+}
 $("#dl").onclick=async()=>{
-  const rs=rowsOf(),c=counts(rs),T=total(rs),v=verdict(T);
-  const SW=[4200,2200,2200,2200],W=[600,3900,3900,1300,800,3400];
-  const sr=(a,b,fl)=>`<w:tr>${a.map((t,i)=>TC(t,SW[i],b,fl)).join("")}</w:tr>`;
-  const sum=`<w:tbl><w:tblPr><w:tblW w:w="10800" w:type="dxa"/><w:tblBorders>${BR}</w:tblBorders></w:tblPr>`+
-    sr(["Status","Skor per uraian","Jumlah uraian","Subtotal skor"],1,"D9E2F3")+
-    sr(["Sesuai","1",c.Sesuai,fmt(c.Sesuai)])+sr(["Sebagian","0,5",c.Sebagian,fmt(c.Sebagian*0.5)])+sr(["Tidak sesuai","0",c.Tidak,"0"])+
-    sr(["Total","",T.n,fmt(T.t)],1,"F2F2F2")+
-    sr([`Tingkat kesesuaian (total skor ÷ ${T.n} UTW)`,"","",fmt(T.p)+"%"],1,"F2F2F2")+
-    `</w:tbl>`+P("");
+  const W=[600,3900,3900,1300,800,3400],rs=rowsOf();
   const row=(cells,b,fill)=>`<w:tr>${cells.map((t,i)=>TC(t,W[i],b,fill)).join("")}</w:tr>`;
-  const tbl=`<w:tbl><w:tblPr><w:tblW w:w="13900" w:type="dxa"/><w:tblBorders>${BR}</w:tblBorders></w:tblPr>`+
-    row(["No","Uraian UTW","Jawaban angket yang sesuai","Status","Skor","Alasan"],1,"D9E2F3")+
-    rs.map(r=>row([r.no,r.u,r.f.length?r.f.map(aPlain).join("\n\n"):"-",r.s==="Tidak"?"Tidak sesuai":r.s,fmt(SK[r.s]),r.a])).join("")+`</w:tbl>`;
-  const body=P("Hasil Pencocokan UTW dan Hasil Angket",1)+
-    P("Jabatan: "+(R.jab||"-"))+P("Responden: "+R.resps.join(", "))+P("")+sum+tbl+P("")+
-    P("Jawaban angket tanpa padanan di UTW",1)+
-    (R.fx.length?R.fx.map(k=>P("• "+aPlain(R.A[k-1]))).join(""):P("Semua jawaban punya padanan."));
+  const tbl=`<w:tbl><w:tblPr><w:tblW w:w="13900" w:type="dxa"/><w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(s=>`<w:${s} w:val="single" w:sz="4" w:color="808080"/>`).join("")}</w:tblBorders></w:tblPr>`+
+    row(["No","Uraian Angket","Uraian FTE yang sesuai","Status","Skor","Alasan"],1,"D9E2F3")+
+    rs.map(r=>row([r.no,r.u,r.f.length?r.f.join("\n\n"):"-",r.s==="Tidak"?"Tidak sesuai":r.s,fmt(SK[r.s]??0),r.a])).join("")+`</w:tbl>`;
+  const c={Sesuai:0,Sebagian:0,Tidak:0};rs.forEach(r=>c[r.s]=(c[r.s]||0)+1);
+  const body=P("Hasil Pencocokan Substansi Angket dan FTE",1)+(R.meta?P(R.meta):"")+sumDoc(c,rs)+tbl+P("")+P("FTE tanpa padanan di Angket",1)+
+    (R.fx.length?R.fx.map(n=>P("• "+(R.F[n-1]||""))).join(""):P("Semua FTE punya padanan."));
   const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="1000" w:right="1000" w:bottom="1000" w:left="1000"/></w:sectPr></w:body></w:document>`;
   const z=new JSZip();
   z.file("[Content_Types].xml",`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
@@ -457,12 +337,10 @@ $("#dl").onclick=async()=>{
   z.file("word/document.xml",doc);
   try{
     const blob=await z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-    const fn="Pencocokan_UTW_Angket"+(R.jab?"_"+R.jab.replace(/[^\w]+/g,"_"):"")+".docx";
-    const url=URL.createObjectURL(blob),a=document.createElement("a");
-    a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);msg("");
-  }catch(e){msg(e&&e.code==="declined"?"Unduhan dibatalkan.":"Gagal mengunduh: "+((e&&(e.message||e.code))||e),1)}
+    const l=document.createElement("a");l.href=URL.createObjectURL(blob);l.download="Pencocokan_Angket_FTE.docx";
+    document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(l.href),5000);msg("");
+  }catch(e){msg("Gagal mengunduh: "+(e.message||e),1)}
 };
 </script>
-
-</body></html>
+</body>
+</html>
